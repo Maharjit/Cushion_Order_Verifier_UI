@@ -1,0 +1,16 @@
+# Environment Variables Template for Cushion Order Verifier UI
+# Copy this file to .env and fill in your actual values
+
+# OpenAI API Configuration
+OPENAI_API_KEY=your_openai_api_key_here
+
+# Custom GPT Assistant Configuration (Optional)
+USE_CUSTOM_GPT=false
+CUSTOM_ASSISTANT_ID=your_custom_assistant_id_here
+
+# Shopify API Configuration (Required for Shopify integration)
+# Your Shopify endpoint is already configured in the code
+
+# Notes:
+# - Your Shopify endpoint is already configured in main.py
+# - No additional Shopify configuration needed

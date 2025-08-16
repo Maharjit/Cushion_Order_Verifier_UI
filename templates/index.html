@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cushion Order Analyzer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .form-container {
+            padding: 40px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .required {
+            color: #e53e3e;
+        }
+
+        input[type="text"], textarea, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="text"]:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #4facfe;
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .file-input {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input input[type="file"] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-input-label {
+            display: block;
+            padding: 12px 15px;
+            border: 2px dashed #4facfe;
+            border-radius: 8px;
+            text-align: center;
+            color: #4facfe;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-input-label:hover {
+            background-color: #f8f9ff;
+            border-color: #00f2fe;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s ease;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #4facfe;
+        }
+
+        .error {
+            background: #fff5f5;
+            border-left-color: #e53e3e;
+            color: #c53030;
+        }
+
+        .success {
+            background: #f0fff4;
+            border-left-color: #38a169;
+            color: #2f855a;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #4facfe;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .input-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .input-section h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .or-divider {
+            text-align: center;
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .or-divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #e1e5e9;
+        }
+
+        .or-divider span {
+            background: white;
+            padding: 0 15px;
+            color: #666;
+            font-weight: 600;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+
+        .info-box h4 {
+            color: #1976d2;
+            margin-bottom: 8px;
+        }
+
+        .info-box p {
+            color: #424242;
+            line-height: 1.5;
+        }
+
+        .mandatory-note {
+            color: #e53e3e;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-top: 5px;
+        }
+
+        .verification-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .verification-table th {
+            background: #4facfe;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .verification-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e1e5e9;
+            vertical-align: top;
+        }
+
+        .verification-table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        .verification-table tr:hover {
+            background-color: #f0f8ff;
+        }
+
+        .status-match {
+            color: #38a169;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-mismatch {
+            color: #e53e3e;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-unclear {
+            color: #d69e2e;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-icon {
+            font-size: 18px;
+        }
+
+        .attribute-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .status-details {
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 5px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛋️ Cushion Order Analyzer</h1>
+            <p>AI-powered analysis of customer conversations to extract order details</p>
+        </div>
+
+        <div class="form-container">
+            <div class="info-box">
+                <h4>📋 How it works:</h4>
+                <p>Provide the final order for verification and customer communication (text or audio) for comprehensive order analysis.</p>
+            </div>
+
+            <form method="POST" action="/submit" enctype="multipart/form-data" id="verifierForm">
+                <!-- Final Order for Verification (Mandatory) -->
+                <div class="input-section">
+                    <h3>📋 Final Order for Verification <span class="required">*</span></h3>
+                    <p style="color: #666; margin-bottom: 15px;">Choose how to provide the order details</p>
+                    
+                    <div class="form-group">
+                        <label for="order_source">Order Source:</label>
+                        <select id="order_source" name="order_source" required onchange="toggleOrderInput()">
+                            <option value="">Select order source...</option>
+                            <option value="manual">Manual Input (Paste order details)</option>
+                            <option value="shopify">Pull from Shopify (Enter Order ID)</option>
+                        </select>
+                        <div class="mandatory-note">Required: Select how you want to provide the order details</div>
+                    </div>
+                    
+                    <!-- Manual Input Section -->
+                    <div id="manual_input_section" style="display: none;">
+                        <div class="form-group">
+                            <label for="final_order">Order Details:</label>
+                            <textarea id="final_order" name="final_order" placeholder="Enter the final order details that need verification..."></textarea>
+                            <div style="color: #666; font-size: 0.9rem; margin-top: 5px;">💡 Tip: Paste order details from Zendesk, Etsy, or any other source</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Shopify Input Section -->
+                    <div id="shopify_input_section" style="display: none;">
+                        <div class="form-group">
+                            <label for="shopify_order_id">Shopify Order ID:</label>
+                            <input type="text" id="shopify_order_id" name="shopify_order_id" placeholder="Enter Shopify order ID (e.g., 1234567890)">
+                            <div style="color: #666; font-size: 0.9rem; margin-top: 5px;">💡 Tip: Order details will be fetched from your Shopify endpoint</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Customer Communication (Mandatory - can be text, audio, or both) -->
+                <div class="input-section">
+                    <h3>💬 Customer Communication <span class="required">*</span></h3>
+                    <p style="color: #666; margin-bottom: 15px;">Provide either text input, upload an audio file, or both</p>
+                    
+                    <div class="form-group">
+                        <label for="customer_chat_text">Chat/Text Input:</label>
+                        <textarea id="customer_chat_text" name="customer_chat_text" placeholder="Paste customer conversation, chat text, or order details here..."></textarea>
+                        <div style="color: #666; font-size: 0.9rem; margin-top: 5px;">💡 Tip: If audio transcription fails, you can still proceed with just the text input</div>
+                    </div>
+
+                    <div class="or-divider">
+                        <span>OR</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="customer_audio_file">Audio File:</label>
+                        <div class="file-input">
+                            <input type="file" id="customer_audio_file" name="customer_audio_file" accept="audio/*">
+                            <label for="customer_audio_file" class="file-input-label">
+                                📁 Click to upload audio file (MP3, WAV, etc.)
+                            </label>
+                        </div>
+                        <div style="color: #666; font-size: 0.9rem; margin-top: 5px;">💡 Tip: Audio transcription uses OpenAI Whisper API for reliable processing</div>
+                        <div style="color: #ff6b35; font-size: 0.9rem; margin-top: 5px;">⚠️ Note: Maximum file size is 25MB. Large files may take a few minutes to transcribe.</div>
+                    </div>
+
+                    <div class="mandatory-note">Required: You must provide either text, audio, or both for customer communication</div>
+                </div>
+
+                <button type="submit" class="submit-btn">🔍 Verify Order</button>
+            </form>
+
+            {% if error %}
+            <div class="result error">
+                <strong>Error:</strong> {{ error }}
+            </div>
+            {% endif %}
+
+            {% if result %}
+            <div class="result success">
+                <h3>📊 Verification Result:</h3>
+                <!-- Raw result for debugging -->
+                <div style="margin-bottom: 20px; padding: 15px; background: #f0f0f0; border-radius: 5px; font-family: monospace; white-space: pre-wrap; max-height: 200px; overflow-y: auto;">{{ result }}</div>
+                <!-- Debug button -->
+                <button type="button" onclick="formatVerificationResults()" style="margin-bottom: 15px; padding: 8px 16px; background: #4facfe; color: white; border: none; border-radius: 5px; cursor: pointer;">🔄 Format Results as Table</button>
+                <!-- Test button -->
+                <button type="button" onclick="testTableFormatting()" style="margin-bottom: 15px; margin-left: 10px; padding: 8px 16px; background: #38a169; color: white; border: none; border-radius: 5px; cursor: pointer;">🧪 Test Table Formatting</button>
+                <!-- Formatted table will be inserted here -->
+                <div id="verificationTable"></div>
+            </div>
+            {% endif %}
+
+            {% if final_order or customer_chat_text or customer_transcript %}
+            <div class="result">
+                <h3>📝 Submitted Information:</h3>
+                {% if order_source %}
+                <p><strong>Order Source:</strong> 
+                    {% if order_source == "shopify" %}
+                        🛍️ Shopify (Order ID: {{ shopify_order_id }})
+                    {% else %}
+                        ✏️ Manual Input
+                    {% endif %}
+                </p>
+                {% endif %}
+                {% if final_order %}
+                <p><strong>Final Order:</strong> {{ final_order }}</p>
+                {% endif %}
+                {% if customer_chat_text %}
+                <p><strong>Customer Communication (Text):</strong> {{ customer_chat_text }}</p>
+                {% endif %}
+                {% if customer_transcript %}
+                <p><strong>Customer Communication (Audio):</strong> {{ customer_transcript }}</p>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        // Function to toggle between manual input and Shopify input
+        function toggleOrderInput() {
+            const orderSource = document.getElementById('order_source').value;
+            const manualSection = document.getElementById('manual_input_section');
+            const shopifySection = document.getElementById('shopify_input_section');
+            
+            // Hide both sections initially
+            manualSection.style.display = 'none';
+            shopifySection.style.display = 'none';
+            
+            // Show the appropriate section based on selection
+            if (orderSource === 'manual') {
+                manualSection.style.display = 'block';
+                document.getElementById('final_order').required = true;
+                document.getElementById('shopify_order_id').required = false;
+            } else if (orderSource === 'shopify') {
+                shopifySection.style.display = 'block';
+                document.getElementById('final_order').required = false;
+                document.getElementById('shopify_order_id').required = true;
+            }
+        }
+        
+        // File input styling for customer audio
+        document.getElementById('customer_audio_file').addEventListener('change', function(e) {
+            const fileName = e.target.files[0]?.name || 'No file selected';
+            const label = document.querySelector('label[for="customer_audio_file"] + .file-input .file-input-label');
+            label.textContent = `📁 ${fileName}`;
+        });
+
+        // Form validation and submission loading
+        document.getElementById('verifierForm').addEventListener('submit', function(e) {
+            const orderSource = document.getElementById('order_source').value;
+            const finalOrder = document.getElementById('final_order').value.trim();
+            const shopifyOrderId = document.getElementById('shopify_order_id').value.trim();
+            const customerChat = document.getElementById('customer_chat_text').value.trim();
+            const customerAudio = document.getElementById('customer_audio_file').files[0];
+            
+            // Check if order source is selected
+            if (!orderSource) {
+                e.preventDefault();
+                alert('Please select an order source.');
+                return;
+            }
+            
+            // Check if order details are provided based on source
+            if (orderSource === 'manual' && !finalOrder) {
+                e.preventDefault();
+                alert('Please provide the final order details for verification.');
+                return;
+            }
+            
+            if (orderSource === 'shopify' && !shopifyOrderId) {
+                e.preventDefault();
+                alert('Please provide the Shopify order ID.');
+                return;
+            }
+            
+            // Check if at least one customer communication method is provided
+            if (!customerChat && !customerAudio) {
+                e.preventDefault();
+                alert('Please provide either customer communication text or audio file (or both).');
+                return;
+            }
+
+            const submitBtn = document.querySelector('.submit-btn');
+            submitBtn.innerHTML = '<div class="spinner"></div>Verifying Order...';
+            submitBtn.disabled = true;
+        });
+
+        // Function to format verification results into a table
+        function formatVerificationResults() {
+            const resultDiv = document.getElementById('verificationTable');
+            if (!resultDiv) return;
+
+            // Get the raw result text from the page
+            const rawResultDiv = document.querySelector('.result.success div[style*="background: #f0f0f0"]');
+            if (!rawResultDiv) return;
+
+            const text = rawResultDiv.textContent || rawResultDiv.innerText;
+            console.log('Raw result text:', text); // Debug log
+            
+            // Check if the result contains verification information
+            if (text.includes('VERIFICATION RESULTS') || text.includes('Attribute') || text.includes('Status') || text.includes('Match') || text.includes('Mismatch') || text.includes('Missing') || text.includes('Unclear')) {
+                console.log('Verification results detected, parsing...'); // Debug log
+                
+                // Parse the text and create a formatted table
+                const lines = text.split('\n').filter(line => line.trim());
+                let tableHTML = '<table class="verification-table">';
+                tableHTML += '<thead><tr><th>Attribute</th><th>Status</th></tr></thead><tbody>';
+                
+                let foundResults = false;
+                
+                for (let line of lines) {
+                    line = line.trim();
+                    console.log('Processing line:', line); // Debug log
+                    
+                    // Skip empty lines, headers, and non-attribute lines
+                    if (!line || line === 'Attribute' || line === 'Status' || line.startsWith('VERIFICATION RESULTS') || line.startsWith('Where Status')) continue;
+                    
+                    // Look for lines that contain attribute:status pattern
+                    if (line.includes(':') && (line.includes('Match') || line.includes('Mismatch') || line.includes('Missing') || line.includes('Unclear'))) {
+                        foundResults = true;
+                        const colonIndex = line.indexOf(':');
+                        const attribute = line.substring(0, colonIndex).trim();
+                        const statusPart = line.substring(colonIndex + 1).trim();
+                        
+                        console.log('Found attribute:', attribute, 'Status part:', statusPart); // Debug log
+                        
+                        // Extract status and details
+                        let status = '';
+                        let details = '';
+                        let statusClass = '';
+                        let statusIcon = '';
+                        
+                        if (statusPart.includes('Match')) {
+                            status = 'Match';
+                            statusClass = 'status-match';
+                            statusIcon = '✅';
+                        } else if (statusPart.includes('Mismatch')) {
+                            status = 'Mismatch';
+                            statusClass = 'status-mismatch';
+                            statusIcon = '❌';
+                        } else if (statusPart.includes('Missing') || statusPart.includes('Unclear')) {
+                            status = 'Missing/Unclear';
+                            statusClass = 'status-unclear';
+                            statusIcon = '⚠️';
+                        }
+                        
+                        // Extract details (text in parentheses)
+                        const detailsMatch = statusPart.match(/\((.*?)\)/);
+                        if (detailsMatch) {
+                            details = detailsMatch[1];
+                        }
+                        
+                        tableHTML += `<tr>
+                            <td class="attribute-name">${attribute}</td>
+                            <td>
+                                <div class="${statusClass}">
+                                    <span class="status-icon">${statusIcon}</span>
+                                    ${status}
+                                </div>
+                                ${details ? `<div class="status-details">(${details})</div>` : ''}
+                            </td>
+                        </tr>`;
+                    }
+                }
+                
+                if (foundResults) {
+                    tableHTML += '</tbody></table>';
+                    resultDiv.innerHTML = tableHTML;
+                    console.log('Table created successfully'); // Debug log
+                } else {
+                    console.log('No verification results found in the expected format'); // Debug log
+                    resultDiv.innerHTML = '<p style="color: #666; font-style: italic;">Verification results will be displayed here in table format.</p>';
+                }
+            } else {
+                console.log('No verification results detected in text'); // Debug log
+                resultDiv.innerHTML = '<p style="color: #666; font-style: italic;">Verification results will be displayed here in table format.</p>';
+            }
+        }
+
+        // Format results when page loads (for existing results)
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, checking for verification results...'); // Debug log
+            formatVerificationResults();
+        });
+
+        // Format results after form submission (for new results)
+        if (document.getElementById('verificationTable')) {
+            console.log('Verification table found, formatting results...'); // Debug log
+            formatVerificationResults();
+        }
+
+        // Test function to verify table formatting works
+        function testTableFormatting() {
+            console.log('Testing table formatting...'); // Debug log
+            const testResult = `VERIFICATION RESULTS:
+Cushion Type: Missing/Unclear (Type of cushion such as seat, back, etc. not explicitly mentioned)
+Shape: Mismatch (Order mentions rectangular; Audio specifies trapezoidal)
+Dimensions: Mismatch (Order: 30" x 41"; Audio: Width unclear, Length unclear, Height 12", Depth 3")
+Fabric: Mismatch (Order: Chenille-Pearl; Audio: Agora 61 or Sunbrella SJ)
+Color or Pattern: Mismatch (Order: Pearl; Audio: Specific pattern/color not mentioned)
+Foam or Fill Type: Mismatch (Order: Fiber Fill; Audio suggests typical cushion cover fill)
+Ties: Match (No ties requested)
+Piping: Mismatch (Order: Piping; Audio: No piping requested)
+Quantity per type/variant: Match (Quantity: 1)
+Special Requests: Missing/Unclear (No specific customer instructions are provided in the audio)`;
+            
+            // Create a temporary div to test parsing
+            const tempDiv = document.createElement('div');
+            tempDiv.textContent = testResult;
+            document.body.appendChild(tempDiv);
+            
+            // Test the parsing
+            const lines = testResult.split('\n').filter(line => line.trim());
+            console.log('Test parsing - found lines:', lines.length);
+            
+            for (let line of lines) {
+                if (line.includes(':') && (line.includes('Match') || line.includes('Mismatch') || line.includes('Missing') || line.includes('Unclear'))) {
+                    console.log('Test - Found attribute line:', line);
+                }
+            }
+            
+            document.body.removeChild(tempDiv);
+        }
+
+
+    </script>
+</body>
+</html>
